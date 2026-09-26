@@ -76,6 +76,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          # The cached ~/.cargo/bin already contains cargo-expand from the previous build.
+          # RustDesk's build script installs the same pinned tool again without --force,
+          # which makes Cargo abort with exit code 101. Remove only that cached binary;
+          # the script will reinstall its required version cleanly.
+          rm -f "$HOME/.cargo/bin/cargo-expand"
+
           NDK="$GITHUB_WORKSPACE/_silrust_src/.tools/android-sdk/ndk/28.2.13676358"
           SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
 
