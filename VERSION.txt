@@ -1,0 +1,4 @@
+silrust v1.0b
+Base RustDesk 1.5.0
+Android ARM64
+Cloud build: GitHub Actions

@@ -1,0 +1,35 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260926135204
+Username: NEREU-SERVER\NEREU
+RunAs User: NEREU-SERVER\NEREU
+Configuration Name: 
+Machine: NEREU-SERVER (Microsoft Windows NT 10.0.26200.0)
+Host Application: powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File D:\silrust-v1.0b-cloudbuild\android\build-launcher.ps1 -ProjectRoot D:\silrust-v1.0b-cloudbuild
+Process ID: 20768
+PSVersion: 5.1.26100.9549
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.9549
+BuildVersion: 10.0.26100.9549
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+
+==> 1/5 Verificar WSL
+
+==> 2/5 Procurar Ubuntu
+Subsistema Windows para Linux não tem distribuições instaladas.
+Pode resolver este problema instalando uma distribuição com as instruções abaixo:
+
+Utilizar "wsl.exe --list --online' para listar as distribuições disponíveis
+e "wsl.exe --install <Distro>" para instalar.
+
+Instala com: wsl --install -d Ubuntu
+
+[ERRO] Ubuntu nao instalado no WSL.
+**********************
+Windows PowerShell transcript end
+End time: 20260926135204
+**********************

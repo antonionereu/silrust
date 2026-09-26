@@ -1,0 +1,9 @@
+{
+  "app": "silrust",
+  "version": "1.0b",
+  "platform": "Android ARM64",
+  "base": "RustDesk 1.5.0",
+  "build": "GitHub Actions / ubuntu-24.04",
+  "local_virtualization_required": false,
+  "protocol_modified": false
+}
