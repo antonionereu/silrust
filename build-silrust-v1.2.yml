@@ -1,0 +1,108 @@
+name: Build SilRust Android
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "silrust-v1.0b-build-corrigido.zip"
+      - "silrust-v1.2-overlay.zip"
+      - ".github/workflows/build-silrust.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: SilRust v1.2 ARM64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract corrected source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _silrust_src
+          mkdir -p _silrust_src
+          unzip -q silrust-v1.0b-build-corrigido.zip -d _silrust_src
+          cd _silrust_src
+          sha256sum -c SHA256SUMS.txt
+
+      - name: Apply SilRust v1.2 UI overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -qo silrust-v1.2-overlay.zip -d _silrust_src
+          cd _silrust_src
+          sha256sum -c SILRUST_V1_2_SHA256SUMS.txt
+          python3 -m py_compile android/patch_silrust.py
+
+      - name: Cache build tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            _silrust_src/.tools
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            ~/.rustup
+          key: silrust-tools-v8-${{ runner.os }}
+
+      - name: Prepare Rust 1.75 + rustfmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.75.0 --profile minimal --component rustfmt
+          rustup target add aarch64-linux-android --toolchain 1.75.0
+          rustup component add rustfmt --toolchain 1.75.0
+          rustup run 1.75.0 rustfmt --version
+
+      - name: Patch Dart analyzer compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("_silrust_src/android/build-silrust-ci.sh")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace("--no-fatal-infos", "")
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Build APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -f \
+            "$HOME/.cargo/bin/cargo-expand" \
+            "$HOME/.cargo/bin/flutter_rust_bridge_codegen" \
+            "$HOME/.cargo/bin/cargo-ndk"
+
+          NDK="$GITHUB_WORKSPACE/_silrust_src/.tools/android-sdk/ndk/28.2.13676358"
+          SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+
+          export BINDGEN_EXTRA_CLANG_ARGS="--target=aarch64-linux-android21 --sysroot=$SYSROOT -I$SYSROOT/usr/include/aarch64-linux-android"
+
+          bash _silrust_src/android/build-silrust-ci.sh "$GITHUB_WORKSPACE/_silrust_src" 2>&1 | tee build-silrust.log
+
+          test -f _silrust_src/dist/silrust-v1.0b-arm64.apk
+          cp _silrust_src/dist/silrust-v1.0b-arm64.apk _silrust_src/dist/SilRust-v1.2-arm64.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SilRust-v1.2-arm64
+          path: _silrust_src/dist/SilRust-v1.2-arm64.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SilRust-v1.2-build-log
+          path: build-silrust.log
+          retention-days: 7

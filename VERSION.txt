@@ -1,4 +1,6 @@
-silrust v1.0b
-Base RustDesk 1.5.0
-Android ARM64
-Cloud build: GitHub Actions
+SilRust v1.2
+Base: RustDesk 1.5.0
+Platform: Android ARM64
+UI: floating clipboard + right-side panels + dynamic keyboard close
+
+Revision: clipboard automático por Copy/Ctrl+C (sem botão +).

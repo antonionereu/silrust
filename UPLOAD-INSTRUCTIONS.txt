@@ -1,0 +1,33 @@
+SILRUST v1.2 — ATUALIZAÇÃO DO GITHUB
+====================================
+
+O ChatGPT consegue ler o repositório antonionereu/silrust, mas a integração
+GitHub continua a devolver HTTP 403 quando tenta escrever ficheiros.
+
+Para aplicar esta atualização ao repositório:
+
+1. Extrair SilRust-v1.2-GitHub-update.zip.
+2. Na raiz do repositório, carregar/substituir:
+      silrust-v1.2-overlay.zip
+      VERSION.txt
+3. Dentro de .github/workflows/ substituir:
+      build-silrust.yml
+
+Assim que build-silrust.yml ou silrust-v1.2-overlay.zip for enviado,
+o GitHub Actions arranca automaticamente.
+
+Artifact esperado:
+      SilRust-v1.2-arm64
+
+Alterações v1.2:
+- Clipboard deixa o bottom-sheet e passa para janela suspensa semi-transparente.
+- Clipboard arrastável e memoriza a posição por peer.
+- Clipboard pode ficar aberto enquanto o teclado está aberto.
+- Botão de teclado muda para seta para baixo e fecha o teclado.
+- FAB azul original do RustDesk é removido.
+- Opções de imagem/escala/codec abrem na direita, junto à barra lateral.
+- MOUSE/PAD abre painel compacto na direita, sem painel gigante ao fundo.
+- Menu Mais abre ancorado à direita, ao lado da barra lateral.
+- Core, P2P, relay, codecs e protocolo RustDesk não são alterados.
+
+ALTERAÇÃO R2: o histórico Clipboard é automático; copiar/Ctrl+C no Android ou no remoto entra no histórico sem botão +.

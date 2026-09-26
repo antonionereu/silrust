@@ -1,0 +1,4 @@
+b237c66543fbce60f781aebc7e9327ef5041aaf64ea3dbeff9d17e6d7100c945  silrust-v1.2-overlay.zip
+3655bccbf456a30ef8aea32cad210e53f25cf6334fff0e0f9978087c10c958c6  .github/workflows/build-silrust.yml
+1638d2f93298a638e0c429594f55e549a51fd8d739427ffec41387edaab0c052  VERSION.txt
+f2be93d35791cc4fed15fff8860fe95c40028ee31e14fcd0d3f574a710bcbeb0  UPLOAD-INSTRUCTIONS.txt
