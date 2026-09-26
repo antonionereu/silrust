@@ -76,11 +76,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          # The cached ~/.cargo/bin already contains cargo-expand from the previous build.
-          # RustDesk's build script installs the same pinned tool again without --force,
-          # which makes Cargo abort with exit code 101. Remove only that cached binary;
-          # the script will reinstall its required version cleanly.
-          rm -f "$HOME/.cargo/bin/cargo-expand"
+          # The cache restores RustDesk build helper binaries from earlier runs.
+          # The upstream/custom build script installs pinned copies again without --force,
+          # which causes Cargo exit code 101. Remove only these helper binaries;
+          # the script reinstalls the required versions cleanly.
+          rm -f \
+            "$HOME/.cargo/bin/cargo-expand" \
+            "$HOME/.cargo/bin/flutter_rust_bridge_codegen" \
+            "$HOME/.cargo/bin/cargo-ndk"
 
           NDK="$GITHUB_WORKSPACE/_silrust_src/.tools/android-sdk/ndk/28.2.13676358"
           SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
