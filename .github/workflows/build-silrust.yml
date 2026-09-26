@@ -15,14 +15,20 @@ jobs:
     name: silrust ARM64
     runs-on: ubuntu-24.04
     timeout-minutes: 180
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Extract corrected source
+        shell: bash
         run: |
+          set -euo pipefail
+          rm -rf _silrust_src
           mkdir -p _silrust_src
           unzip -q silrust-v1.0b-build-corrigido.zip -d _silrust_src
           cd _silrust_src
           sha256sum -c SHA256SUMS.txt
+
       - name: Cache build tools
         uses: actions/cache@v4
         with:
@@ -31,12 +37,24 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-          key: silrust-tools-v4-${{ runner.os }}
+            ~/.rustup
+          key: silrust-tools-v5-${{ runner.os }}
+
+      - name: Prepare Rust 1.75 + rustfmt
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.75.0 --profile minimal --component rustfmt
+          rustup target add aarch64-linux-android --toolchain 1.75.0
+          rustup component add rustfmt --toolchain 1.75.0
+          rustup run 1.75.0 rustfmt --version
+
       - name: Build APK
         shell: bash
         run: |
           set -euo pipefail
           bash _silrust_src/android/build-silrust-ci.sh "$GITHUB_WORKSPACE/_silrust_src" 2>&1 | tee build-silrust.log
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
@@ -44,6 +62,7 @@ jobs:
           path: _silrust_src/dist/silrust-v1.0b-arm64.apk
           if-no-files-found: error
           retention-days: 30
+
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
