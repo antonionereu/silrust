@@ -38,7 +38,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             ~/.rustup
-          key: silrust-tools-v5-${{ runner.os }}
+          key: silrust-tools-v6-${{ runner.os }}
 
       - name: Prepare Rust 1.75 + rustfmt
         shell: bash
@@ -48,6 +48,22 @@ jobs:
           rustup target add aarch64-linux-android --toolchain 1.75.0
           rustup component add rustfmt --toolchain 1.75.0
           rustup run 1.75.0 rustfmt --version
+
+      - name: Patch Dart analyzer compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("_silrust_src/android/build-silrust-ci.sh")
+          s = p.read_text(encoding="utf-8")
+          bad = "--no-fatal-infos"
+          if bad not in s:
+              print("Aviso: --no-fatal-infos já não existe no script.")
+          else:
+              p.write_text(s.replace(bad, ""), encoding="utf-8")
+              print("Removido --no-fatal-infos (incompatível com Dart 3.5.4).")
+          PY
 
       - name: Build APK
         shell: bash
