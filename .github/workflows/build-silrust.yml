@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - "silrust-v1.0b-build-corrigido.zip"
-      - "silrust-v1.1-overlay-coexist.zip"
+      - "silrust-v1.2-overlay.zip"
       - ".github/workflows/build-silrust.yml"
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    name: SilRust v1.1 ARM64
+    name: SilRust v1.2 ARM64
     runs-on: ubuntu-24.04
     timeout-minutes: 180
 
@@ -30,13 +30,13 @@ jobs:
           cd _silrust_src
           sha256sum -c SHA256SUMS.txt
 
-      - name: Apply SilRust v1.1 UI overlay
+      - name: Apply SilRust v1.2 UI overlay
         shell: bash
         run: |
           set -euo pipefail
-          unzip -qo silrust-v1.1-overlay-coexist.zip -d _silrust_src
+          unzip -qo silrust-v1.2-overlay.zip -d _silrust_src
           cd _silrust_src
-          sha256sum -c SILRUST_V1_1_SHA256SUMS.txt
+          sha256sum -c SILRUST_V1_2_SHA256SUMS.txt
           python3 -m py_compile android/patch_silrust.py
 
       - name: Cache build tools
@@ -48,7 +48,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             ~/.rustup
-          key: silrust-tools-v7-${{ runner.os }}
+          key: silrust-tools-v8-${{ runner.os }}
 
       - name: Prepare Rust 1.75 + rustfmt
         shell: bash
@@ -76,10 +76,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # The cache restores RustDesk build helper binaries from earlier runs.
-          # The upstream/custom build script installs pinned copies again without --force,
-          # which causes Cargo exit code 101. Remove only these helper binaries;
-          # the script reinstalls the required versions cleanly.
           rm -f \
             "$HOME/.cargo/bin/cargo-expand" \
             "$HOME/.cargo/bin/flutter_rust_bridge_codegen" \
@@ -93,13 +89,13 @@ jobs:
           bash _silrust_src/android/build-silrust-ci.sh "$GITHUB_WORKSPACE/_silrust_src" 2>&1 | tee build-silrust.log
 
           test -f _silrust_src/dist/silrust-v1.0b-arm64.apk
-          cp _silrust_src/dist/silrust-v1.0b-arm64.apk _silrust_src/dist/SilRust-v1.1-arm64.apk
+          cp _silrust_src/dist/silrust-v1.0b-arm64.apk _silrust_src/dist/SilRust-v1.2-arm64.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SilRust-v1.1-arm64
-          path: _silrust_src/dist/SilRust-v1.1-arm64.apk
+          name: SilRust-v1.2-arm64
+          path: _silrust_src/dist/SilRust-v1.2-arm64.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -107,6 +103,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: SilRust-v1.1-build-log
+          name: SilRust-v1.2-build-log
           path: build-silrust.log
           retention-days: 7
