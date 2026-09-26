@@ -38,7 +38,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             ~/.rustup
-          key: silrust-tools-v6-${{ runner.os }}
+          key: silrust-tools-v7-${{ runner.os }}
 
       - name: Prepare Rust 1.75 + rustfmt
         shell: bash
@@ -57,18 +57,23 @@ jobs:
           from pathlib import Path
           p = Path("_silrust_src/android/build-silrust-ci.sh")
           s = p.read_text(encoding="utf-8")
-          bad = "--no-fatal-infos"
-          if bad not in s:
-              print("Aviso: --no-fatal-infos já não existe no script.")
-          else:
-              p.write_text(s.replace(bad, ""), encoding="utf-8")
-              print("Removido --no-fatal-infos (incompatível com Dart 3.5.4).")
+          s = s.replace("--no-fatal-infos", "")
+          p.write_text(s, encoding="utf-8")
           PY
 
       - name: Build APK
         shell: bash
         run: |
           set -euo pipefail
+
+          NDK="$GITHUB_WORKSPACE/_silrust_src/.tools/android-sdk/ndk/28.2.13676358"
+          SYSROOT="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot"
+
+          # hwcodec 0.7.1 usa bindgen 0.59, que não lê a variável
+          # target-specific definida pelo cargo-ndk 3.1.2. Damos-lhe o
+          # sysroot Android também pela variável global.
+          export BINDGEN_EXTRA_CLANG_ARGS="--target=aarch64-linux-android21 --sysroot=$SYSROOT -I$SYSROOT/usr/include/aarch64-linux-android"
+
           bash _silrust_src/android/build-silrust-ci.sh "$GITHUB_WORKSPACE/_silrust_src" 2>&1 | tee build-silrust.log
 
       - name: Upload APK
