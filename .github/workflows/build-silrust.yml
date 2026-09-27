@@ -5,7 +5,7 @@ on:
   push:
     paths:
       - "silrust-v1.0b-build-corrigido.zip"
-      - "silrust-v1.2-overlay.zip"
+      - "SilRust-v1.2-overlay.zip"
       - ".github/workflows/build-silrust.yml"
 
 permissions:
@@ -34,7 +34,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          unzip -qo silrust-v1.2-overlay.zip -d _silrust_src
+          test -f SilRust-v1.2-overlay.zip
+          unzip -tq SilRust-v1.2-overlay.zip >/dev/null
+          unzip -qo SilRust-v1.2-overlay.zip -d _silrust_src
           cd _silrust_src
           sha256sum -c SILRUST_V1_2_SHA256SUMS.txt
           python3 -m py_compile android/patch_silrust.py
@@ -48,7 +50,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             ~/.rustup
-          key: silrust-tools-v8-${{ runner.os }}
+          key: silrust-tools-v7-${{ runner.os }}
 
       - name: Prepare Rust 1.75 + rustfmt
         shell: bash
@@ -76,6 +78,10 @@ jobs:
         run: |
           set -euo pipefail
 
+          # The cache restores RustDesk build helper binaries from earlier runs.
+          # The upstream/custom build script installs pinned copies again without --force,
+          # which causes Cargo exit code 101. Remove only these helper binaries;
+          # the script reinstalls the required versions cleanly.
           rm -f \
             "$HOME/.cargo/bin/cargo-expand" \
             "$HOME/.cargo/bin/flutter_rust_bridge_codegen" \
