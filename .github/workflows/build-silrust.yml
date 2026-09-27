@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "silrust-v1.0b-build-corrigido.zip"
+      - "silrust-v1.2-overlay.zip"
       - "SilRust-v1.2-overlay.zip"
       - ".github/workflows/build-silrust.yml"
 
@@ -34,9 +35,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f SilRust-v1.2-overlay.zip
-          unzip -tq SilRust-v1.2-overlay.zip >/dev/null
-          unzip -qo SilRust-v1.2-overlay.zip -d _silrust_src
+          OVERLAY=""
+          for f in silrust-v1.2-overlay.zip SilRust-v1.2-overlay.zip; do
+            if [ -f "$f" ]; then
+              OVERLAY="$f"
+              break
+            fi
+          done
+          test -n "$OVERLAY"
+          echo "Overlay: $OVERLAY"
+          unzip -tq "$OVERLAY" >/dev/null
+          unzip -qo "$OVERLAY" -d _silrust_src
           cd _silrust_src
           sha256sum -c SILRUST_V1_2_SHA256SUMS.txt
           python3 -m py_compile android/patch_silrust.py
@@ -112,3 +121,4 @@ jobs:
           name: SilRust-v1.2-build-log
           path: build-silrust.log
           retention-days: 7
+
